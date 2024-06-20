@@ -1,5 +1,5 @@
 import dbConnect from "@/lib/mongo";
-import Event from "@/models/Event";
+import Event from "@/models/event";
 
 export async function GET(request) {
   try {
