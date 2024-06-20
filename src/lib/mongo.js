@@ -8,7 +8,7 @@ if (!MONGODB_URI) {
 
 async function dbConnect() {
   mongoose
-    .connect(MONGO_URI, {
+    .connect(MONGODB_URI, {
       connectTimeoutMS: 3000,
     })
     .catch((err) => console.log(`Error connecting to DB: ${err}`));
