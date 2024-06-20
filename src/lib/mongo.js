@@ -6,31 +6,20 @@ if (!MONGODB_URI) {
   throw new Error("Please define the MONGODB_URI environment variable");
 }
 
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
 async function dbConnect() {
-  if (cached.conn) {
-    return cached.conn;
-  }
+  mongoose
+    .connect(MONGO_URI, {
+      connectTimeoutMS: 3000,
+    })
+    .catch((err) => console.log(`Error connecting to DB: ${err}`));
 
-  if (!cached.promise) {
-    const opts = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      bufferCommands: false,
-    };
+  mongoose.connection.on("connected", () => {
+    console.log("Connected to DB");
+  });
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      return mongoose;
-    });
-  }
-
-  cached.conn = await cached.promise;
-  return cached.conn;
+  mongoose.connection.on("error", () => {
+    console.log("Error connecting to DB");
+  });
 }
 
 export default dbConnect;
