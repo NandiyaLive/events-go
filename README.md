@@ -4,14 +4,15 @@
 
 Welcome to the Events-go documentation. This documentation aims to guide you through using the Events-go platform, which facilitates efficient event planning and resource management for University of Vavuniya. Events-go helps streamline the process of organizing events by managing venues, equipment, and personnel effectively. 
 ## Table of Contents
-- [x] [Events-go Documentation](#events-go-documentation)
-  - [x] [Introduction](#introduction)
-  - [x] [Table of Contents](#table-of-contents)
-  - [x] [System Requirements](#system-requirements)
-  - [x] [Getting Started](#getting-started)
-    - [x] [Step-by-Step Guide to Creating an Event](#step-by-step-guide-to-creating-an-event)
-  - [x] [Current Usage](#current-usage)
-  - [ ] [To-Do](#to-do)
+- [Events-go Documentation](#events-go-documentation)
+  - [Introduction](#introduction)
+  - [Table of Contents](#table-of-contents)
+  - [System Requirements](#system-requirements)
+    - [Installation](#installation)
+  - [Getting Started](#getting-started)
+    - [Step-by-Step Guide to Creating an Event](#step-by-step-guide-to-creating-an-event)
+  - [Current Usage](#current-usage)
+  - [To-Do](#to-do)
 
 ## System Requirements
 
