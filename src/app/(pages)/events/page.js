@@ -53,11 +53,11 @@ const EventsPage = () => {
             <h2 className="text-2xl font-semibold mb-2">{event.eventName}</h2>
             <p>
               <strong>Start:</strong>{" "}
-              {new Date(event.startDateTime).toLocaleString()}
+              {new Date(event.startDateTime).toISOString().split("T")[0]}
             </p>
             <p>
               <strong>End:</strong>{" "}
-              {new Date(event.endDateTime).toLocaleString()}
+              {new Date(event.endDateTime).toISOString().split("T")[0]}
             </p>
             <p>
               <strong>Venue:</strong> {event.venue.venueName}
