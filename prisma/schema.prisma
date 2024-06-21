@@ -19,8 +19,6 @@ model Event {
   personnel     Personnel[]
 
   venueId String
-
-  @@map("events")
 }
 
 model Venue {
