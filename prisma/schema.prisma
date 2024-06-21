@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Event {
+  id            String      @id @default(cuid())
+  eventName     String
+  description   String?
+  startDateTime DateTime
+  endDateTime   DateTime
+  venueId       String
+  venue         Venue       @relation(fields: [venueId], references: [id])
+  equipment     Equipment[]
+  personnel     Personnel[]
+}
+
+model Venue {
+  id        String  @id @default(cuid())
+  venueName String
+  location  String
+  capacity  Int
+  events    Event[]
+}
+
+model Equipment {
+  id            String  @id @default(cuid())
+  equipmentName String
+  description   String?
+  quantity      Int
+  equipmentType String
+  events        Event[]
+}
+
+model Personnel {
+  id     String  @id @default(cuid())
+  name   String
+  role   String
+  events Event[]
+}

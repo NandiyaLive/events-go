@@ -1,40 +1,67 @@
-import dbConnect from "@/lib/mongo";
-import Equipment from "@/models/equipment";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export async function GET(request) {
   try {
-    await dbConnect();
-    const equipment = await Equipment.find({});
-    return new Response(JSON.stringify({ success: true, data: equipment }), {
-      headers: { "Content-Type": "application/json" },
+    const equipments = await prisma.equipment.findMany({
+      include: {
+        events: true,
+      },
     });
+    return new Response(JSON.stringify(equipments), { status: 200 });
   } catch (error) {
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      }
+      JSON.stringify({ error: "Unable to fetch equipments" }),
+      { status: 500 }
     );
   }
 }
 
 export async function POST(request) {
   try {
-    await dbConnect();
-    const body = await request.json();
-    const newEquipment = await Equipment.create(body);
-    return new Response(JSON.stringify({ success: true, data: newEquipment }), {
-      status: 201,
-      headers: { "Content-Type": "application/json" },
+    const data = await request.json();
+    const equipment = await prisma.equipment.create({
+      data: data,
+    });
+    return new Response(JSON.stringify(equipment), { status: 201 });
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: "Unable to create equipment" }),
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request) {
+  try {
+    const data = await request.json();
+    const equipment = await prisma.equipment.update({
+      where: { id: data.id },
+      data: data,
+    });
+    return new Response(JSON.stringify(equipment), { status: 200 });
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: "Unable to update equipment" }),
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const { id } = await request.json();
+    await prisma.equipment.delete({
+      where: { id: id },
+    });
+    return new Response(JSON.stringify({ message: "Equipment deleted" }), {
+      status: 200,
     });
   } catch (error) {
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      }
+      JSON.stringify({ error: "Unable to delete equipment" }),
+      { status: 500 }
     );
   }
 }

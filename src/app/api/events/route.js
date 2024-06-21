@@ -1,45 +1,65 @@
-import dbConnect from "@/lib/mongo";
-import Event from "@/models/event";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export async function GET(request) {
   try {
-    await dbConnect();
-
-    const events = await Event.find({});
-
-    return new Response(JSON.stringify({ success: true, data: events }), {
-      headers: { "Content-Type": "application/json" },
+    const events = await prisma.event.findMany({
+      include: {
+        venue: true,
+        equipment: true,
+        personnel: true,
+      },
     });
+    return new Response(JSON.stringify(events), { status: 200 });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: "Unable to fetch events" }), {
+      status: 500,
+    });
   }
 }
 
 export async function POST(request) {
   try {
-    await dbConnect();
+    const data = await request.json();
+    const event = await prisma.event.create({
+      data: data,
+    });
+    return new Response(JSON.stringify(event), { status: 201 });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: "Unable to create event" }), {
+      status: 500,
+    });
+  }
+}
 
-    const body = await request.json();
+export async function PATCH(request) {
+  try {
+    const data = await request.json();
+    const event = await prisma.event.update({
+      where: { id: data.id },
+      data: data,
+    });
+    return new Response(JSON.stringify(event), { status: 200 });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: "Unable to update event" }), {
+      status: 500,
+    });
+  }
+}
 
-    const newEvent = await Event.create(body);
-
-    return new Response(JSON.stringify({ success: true, data: newEvent }), {
-      status: 201,
-      headers: { "Content-Type": "application/json" },
+export async function DELETE(request) {
+  try {
+    const { id } = await request.json();
+    await prisma.event.delete({
+      where: { id: id },
+    });
+    return new Response(JSON.stringify({ message: "Event deleted" }), {
+      status: 200,
     });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: "Unable to delete event" }), {
+      status: 500,
+    });
   }
 }
