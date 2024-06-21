@@ -38,3 +38,7 @@ next-env.d.ts
 
 
 .fuse*
+
+# Prisma Migration
+/prisma/migration
+/prisma/*.db
