@@ -7,7 +7,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center">
           <div>
             <Link href="/" className="text-white text-xl font-bold">
-              Event Manager
+              Events Go
             </Link>
           </div>
 
