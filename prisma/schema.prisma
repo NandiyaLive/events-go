@@ -14,10 +14,13 @@ model Event {
   description   String?
   startDateTime DateTime
   endDateTime   DateTime
-  venueId       String
   venue         Venue       @relation(fields: [venueId], references: [id])
   equipment     Equipment[]
   personnel     Personnel[]
+
+  venueId String
+
+  @@map("events")
 }
 
 model Venue {
