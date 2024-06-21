@@ -2,17 +2,67 @@
 
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+
+const formSchema = z.object({
+  eventName: z.string(),
+  description: z.string(),
+  startDateTime: z.date(),
+  endDateTime: z.date(),
+  venueId: z.string(),
+  equipmentIds: z.array(z.string()),
+  personnelIds: z.array(z.string()),
+});
 
 const CreateEventPage = () => {
-  const { register, handleSubmit, reset } = useForm();
+  const { handleSubmit, reset, control } = useForm();
   const [venues, setVenues] = useState([]);
   const [equipment, setEquipment] = useState([]);
   const [personnel, setPersonnel] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const router = useRouter();
+
+  const { toast } = useToast();
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      eventName: "",
+      description: "",
+      startDateTime: "",
+      endDateTime: "",
+      venueId: 0,
+      equipmentIds: [],
+      personnelIds: [],
+    },
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,9 +77,9 @@ const CreateEventPage = () => {
         setVenues(venuesResponse.data);
         setEquipment(equipmentResponse.data);
         setPersonnel(personnelResponse.data);
-        setLoading(false);
       } catch (err) {
-        setError(err.message);
+        console.log(err);
+      } finally {
         setLoading(false);
       }
     };
@@ -39,11 +89,21 @@ const CreateEventPage = () => {
 
   const onSubmit = async (data) => {
     try {
-      await axios.post("/api/event", data);
+      await axios.post("/api/events", data);
+
       reset();
+
+      toast({
+        title: "Event created",
+      });
+
       router.push("/events");
     } catch (err) {
-      setError(err.message);
+      toast({
+        title: "Error",
+        description: err.response.data.error || err.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -51,93 +111,253 @@ const CreateEventPage = () => {
     return <p className="text-center mt-4">Loading...</p>;
   }
 
-  if (error) {
-    return <p className="text-center mt-4 text-red-500">Error: {error}</p>;
-  }
-
   return (
-    <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-6">Create Event</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label className="block mb-2">Event Name</label>
-          <input
-            {...register("eventName", { required: true })}
-            className="w-full px-4 py-2 border rounded-md"
+    <main className="container max-w-8xl mt-8">
+      <Form {...form}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          <FormField
+            control={control}
+            name="eventName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Tech Conference 2024" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div>
-          <label className="block mb-2">Start Date and Time</label>
-          <input
-            type="datetime-local"
-            {...register("startDateTime", { required: true })}
-            className="w-full px-4 py-2 border rounded-md"
+          <FormField
+            control={control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="A conference for all things tech."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div>
-          <label className="block mb-2">End Date and Time</label>
-          <input
-            type="datetime-local"
-            {...register("endDateTime", { required: true })}
-            className="w-full px-4 py-2 border rounded-md"
+          <FormField
+            control={control}
+            name="startDateTime"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Start Date Time</FormLabel>
+                <Popover model={true}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div>
-          <label className="block mb-2">Venue</label>
-          {venues.map((venue) => (
-            <div key={venue.id} className="flex items-center">
-              <input
-                type="checkbox"
-                {...register("venueId")}
-                value={venue.id}
-                className="mr-2"
-              />
-              <span>{venue.venueName}</span>
-            </div>
-          ))}
-        </div>
+          <FormField
+            control={control}
+            name="endDateTime"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>End Date Time</FormLabel>
+                <Popover model={true}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div>
-          <label className="block mb-2">Equipment</label>
-          {equipment.map((eq) => (
-            <div key={eq.id} className="flex items-center">
-              <input
-                type="checkbox"
-                {...register("equipmentIds")}
-                value={eq.id}
-                className="mr-2"
-              />
-              <span>{eq.equipmentName}</span>
-            </div>
-          ))}
-        </div>
+          <FormField
+            control={control}
+            name="venueId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Venue</FormLabel>
 
-        <div>
-          <label className="block mb-2">Personnel</label>
-          {personnel.map((person) => (
-            <div key={person.id} className="flex items-center">
-              <input
-                type="checkbox"
-                {...register("personnelIds")}
-                value={person.id}
-                className="mr-2"
-              />
-              <span>{person.name}</span>
-            </div>
-          ))}
-        </div>
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="flex flex-col space-y-1"
+                  >
+                    <FormItem className="flex items-center space-x-3 space-y-0">
+                      {venues.map((venue) => (
+                        <Fragment key={venue.id}>
+                          <FormControl>
+                            <RadioGroupItem value={venue.id} />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            {venue.venueName}
+                          </FormLabel>
+                        </Fragment>
+                      ))}
+                    </FormItem>
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-500 text-white rounded-md"
-        >
-          Create Event
-        </button>
-      </form>
-    </div>
+          <FormField
+            control={control}
+            name="equipmentIds"
+            render={() => (
+              <FormItem>
+                <div className="mb-4">
+                  <FormLabel className="text-base">Equipment</FormLabel>
+                </div>
+                {equipment.map((item) => (
+                  <FormField
+                    key={item.id}
+                    control={control}
+                    name="equipmentIds"
+                    render={({ field }) => {
+                      return (
+                        <FormItem
+                          key={item.id}
+                          className="flex flex-row items-start space-x-3 space-y-0"
+                        >
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(item.id)}
+                              onCheckedChange={(checked) => {
+                                return checked
+                                  ? field.onChange([...field.value, item.id])
+                                  : field.onChange(
+                                      field.value?.filter(
+                                        (value) => value !== item.id
+                                      )
+                                    );
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            {item.equipmentName}
+                          </FormLabel>
+                        </FormItem>
+                      );
+                    }}
+                  />
+                ))}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="personnelIds"
+            render={() => (
+              <FormItem>
+                <div className="mb-4">
+                  <FormLabel className="text-base">Personnel</FormLabel>
+                </div>
+                {personnel.map((item) => (
+                  <FormField
+                    key={item.id}
+                    control={control}
+                    name="personnelIds"
+                    render={({ field }) => {
+                      return (
+                        <FormItem
+                          key={item.id}
+                          className="flex flex-row items-start space-x-3 space-y-0"
+                        >
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(item.id)}
+                              onCheckedChange={(checked) => {
+                                return checked
+                                  ? field.onChange([...field.value, item.id])
+                                  : field.onChange(
+                                      field.value?.filter(
+                                        (value) => value !== item.id
+                                      )
+                                    );
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            {item.name}
+                          </FormLabel>
+                        </FormItem>
+                      );
+                    }}
+                  />
+                ))}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit">Submit</Button>
+        </form>
+      </Form>
+    </main>
   );
 };
 

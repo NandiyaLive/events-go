@@ -1,6 +1,7 @@
 "use client";
 
 import axios from "axios";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const EventsPage = () => {
@@ -35,6 +36,14 @@ const EventsPage = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <h1 className="text-3xl font-bold mb-6">Events</h1>
+
+      <Link
+        href="/events/create"
+        className="inline-block px-4 py-2 mb-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+      >
+        Create Event
+      </Link>
+
       <ul className="space-y-4">
         {events.map((event) => (
           <li

@@ -47,12 +47,14 @@ const VenuesPage = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <h1 className="text-3xl font-bold mb-6">Venues</h1>
+      
       <Link
         href="/venues/create"
         className="inline-block px-4 py-2 mb-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
       >
         Create Venue
       </Link>
+
       <ul className="space-y-4">
         {venues.map((venue) => (
           <li
