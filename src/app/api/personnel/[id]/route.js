@@ -23,11 +23,11 @@ export async function PATCH(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
-  const venueId = params.id;
+  const personnelId = params.id;
 
   try {
-    await prisma.venue.delete({
-      where: { id: venueId },
+    await prisma.personnel.delete({
+      where: { id: personnelId },
     });
 
     return new Response(JSON.stringify({ success: true }), {

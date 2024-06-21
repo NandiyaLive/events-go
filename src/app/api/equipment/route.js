@@ -24,6 +24,7 @@ export async function POST(request) {
     });
     return new Response(JSON.stringify(equipment), { status: 201 });
   } catch (error) {
+    console.log(error.message);
     return new Response(
       JSON.stringify({ error: "Unable to create equipment" }),
       { status: 500 }

@@ -1,3 +1,5 @@
+import prisma from "@/lib/prisma";
+
 export async function PATCH(request) {
   try {
     const data = await request.json();
@@ -14,19 +16,22 @@ export async function PATCH(request) {
   }
 }
 
-export async function DELETE(request) {
+export async function DELETE(req, { params }) {
+  const equipmentId = params.id;
+
   try {
-    const { id } = await request.json();
     await prisma.equipment.delete({
-      where: { id: id },
+      where: { id: equipmentId },
     });
-    return new Response(JSON.stringify({ message: "Equipment deleted" }), {
+
+    return new Response(JSON.stringify({ success: true }), {
       status: 200,
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     return new Response(
-      JSON.stringify({ error: "Unable to delete equipment" }),
-      { status: 500 }
+      JSON.stringify({ success: false, error: error.message }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }
