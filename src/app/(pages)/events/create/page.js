@@ -151,7 +151,7 @@ const CreateEventPage = () => {
             name="startDateTime"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Start Date Time</FormLabel>
+                <FormLabel>Start Date</FormLabel>
                 <Popover model={true}>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -176,9 +176,7 @@ const CreateEventPage = () => {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
+                      disabled={(date) => date < new Date("1900-01-01")}
                       initialFocus
                     />
                   </PopoverContent>
@@ -193,7 +191,7 @@ const CreateEventPage = () => {
             name="endDateTime"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>End Date Time</FormLabel>
+                <FormLabel>End Date</FormLabel>
                 <Popover model={true}>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -218,9 +216,7 @@ const CreateEventPage = () => {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
+                      disabled={(date) => date < new Date("1900-01-01")}
                       initialFocus
                     />
                   </PopoverContent>
@@ -236,7 +232,6 @@ const CreateEventPage = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Venue</FormLabel>
-
                 <FormControl>
                   <RadioGroup
                     onValueChange={field.onChange}
@@ -270,7 +265,7 @@ const CreateEventPage = () => {
                 <div className="mb-4">
                   <FormLabel className="text-base">Equipment</FormLabel>
                 </div>
-                {equipment.map((item) => (
+                {equipment?.map((item) => (
                   <FormField
                     key={item.id}
                     control={control}
@@ -285,12 +280,11 @@ const CreateEventPage = () => {
                             <Checkbox
                               checked={field.value?.includes(item.id)}
                               onCheckedChange={(checked) => {
+                                const value = field.value || [];
                                 return checked
-                                  ? field.onChange([...field.value, item.id])
+                                  ? field.onChange([...value, item.id])
                                   : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== item.id
-                                      )
+                                      value.filter((value) => value !== item.id)
                                     );
                               }}
                             />
@@ -331,12 +325,11 @@ const CreateEventPage = () => {
                             <Checkbox
                               checked={field.value?.includes(item.id)}
                               onCheckedChange={(checked) => {
+                                const value = field.value || [];
                                 return checked
-                                  ? field.onChange([...field.value, item.id])
+                                  ? field.onChange([...value, item.id])
                                   : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== item.id
-                                      )
+                                      value.filter((value) => value !== item.id)
                                     );
                               }}
                             />
